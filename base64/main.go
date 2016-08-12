@@ -6,6 +6,7 @@ import (
 
 	"github.com/atotto/clipboard"
 	"github.com/targodan/gogen/commands"
+	"github.com/targodan/gogen/conv"
 	"github.com/urfave/cli"
 )
 
@@ -35,27 +36,17 @@ func init() {
 }
 
 func decode(c *cli.Context) (err error) {
-	text := c.Args().Get(0)
+	text, err := conv.TextOrStdin(c.Args().Get(0))
+	if err != nil {
+		return
+	}
 
 	data, err := base64.StdEncoding.DecodeString(text)
 	if err != nil {
 		return
 	}
 
-	out := "[]byte{"
-	ln := 0
-	for _, b := range data {
-		out = fmt.Sprintf("%s0x%02x, ", out, b)
-		ln++
-		if ln >= c.Int("linebreak") {
-			out = fmt.Sprintln(out)
-			ln = 0
-		}
-	}
-	if ln == 0 {
-		out = out[:len(out)-1]
-	}
-	out = out[:len(out)-2] + "}"
+	out := conv.BytesToString(data, c.Int("linebreak"))
 	fmt.Println(out)
 
 	if c.GlobalBool("clipboard") || c.Bool("clipboard") {
