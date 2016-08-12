@@ -8,7 +8,27 @@ import (
 	"github.com/urfave/cli"
 )
 
-func Run(c *cli.Context) (err error) {
+func Command() cli.Command {
+	return cli.Command{
+		Name:    "file2bytes",
+		Aliases: []string{"f2b"},
+		Usage:   "Convert a file into a golang byte slice.",
+		Flags: []cli.Flag{
+			cli.IntFlag{
+				Name:  "linebreak, b",
+				Usage: "break line after n bytes",
+				Value: 12,
+			},
+			cli.BoolFlag{
+				Name:  "clipboard, c",
+				Usage: "Copy output to clipboard",
+			},
+		},
+		Action: run,
+	}
+}
+
+func run(c *cli.Context) (err error) {
 	filename := c.Args().Get(0)
 
 	data, err := ioutil.ReadFile(filename)
