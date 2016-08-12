@@ -4,7 +4,11 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/targodan/gogen/file2bytes"
+	_ "github.com/targodan/gogen/base64"
+	. "github.com/targodan/gogen/commands"
+	_ "github.com/targodan/gogen/file2bytes"
+	_ "github.com/targodan/gogen/hex"
+
 	"github.com/urfave/cli"
 )
 
@@ -22,9 +26,7 @@ func main() {
 	app.Usage = "A nifty tool to generate snippets for go."
 	app.Version = APP_VER
 
-	app.Commands = []cli.Command{
-		file2bytes.Command(),
-	}
+	app.Commands = Commands
 
 	app.Run(os.Args)
 }
