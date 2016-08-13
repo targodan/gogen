@@ -17,12 +17,12 @@ func init() {
 		Flags: []cli.Flag{
 			cli.IntFlag{
 				Name:  "linebreak, b",
-				Usage: "break line after n bytes",
+				Usage: "Break line after [value] bytes.",
 				Value: 12,
 			},
 			cli.BoolFlag{
 				Name:  "clipboard, c",
-				Usage: "Copy output to clipboard",
+				Usage: "Copy output to clipboard.",
 			},
 		},
 		Action: run,

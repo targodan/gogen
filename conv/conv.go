@@ -3,11 +3,33 @@ package conv
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
 )
+
+var (
+	reOuter *regexp.Regexp
+	reLit   *regexp.Regexp
+	reBin   *regexp.Regexp
+	reOct   *regexp.Regexp
+	reHex   *regexp.Regexp
+	reDec   *regexp.Regexp
+)
+
+func init() {
+	reOuter = regexp.MustCompile(`(\s*\[\d*\]byte\s*\{)?([^}]*)\}?`)
+	reLit = regexp.MustCompile(`^-?(0b[01]+|0x[a-fA-F0-9]+|\d+)`)
+	reBin = regexp.MustCompile(`^(-?)0b([01]+)$`)
+	reOct = regexp.MustCompile(`^(-?)0(\d+)$`)
+	reHex = regexp.MustCompile(`^(-?)0x([a-fA-F0-9]+)$`)
+	reDec = regexp.MustCompile(`^(-?)([1-9]\d*|0)$`)
+}
 
 func BytesToString(data []byte, lnbr int) string {
 	out := "[]byte{"
@@ -67,4 +89,94 @@ func TextOrStdin(arg string) (string, error) {
 	}
 	data, err := readFromStdin()
 	return string(data), err
+}
+
+func litToByteUnsigned(lit string) (byte, error) {
+	var b uint64
+	var reRes []string
+	var err error
+
+	reRes = reBin.FindStringSubmatch(lit)
+	if reRes != nil {
+		b, err = strconv.ParseUint(reRes[1]+reRes[2], 2, 8)
+	} else {
+		reRes = reOct.FindStringSubmatch(lit)
+		if reRes != nil {
+			b, err = strconv.ParseUint(reRes[1]+reRes[2], 8, 8)
+		} else {
+			reRes = reHex.FindStringSubmatch(lit)
+			if reRes != nil {
+				b, err = strconv.ParseUint(reRes[1]+reRes[2], 16, 8)
+			} else {
+				reRes = reDec.FindStringSubmatch(lit)
+				if reRes != nil {
+					b, err = strconv.ParseUint(reRes[1]+reRes[2], 10, 8)
+				} else {
+					return 0, errors.New("Invalid literal. \"" + lit + "\"")
+				}
+			}
+		}
+	}
+
+	return byte(b), err
+}
+
+func litToByteSigned(lit string) (byte, error) {
+	var b int64
+	var reRes []string
+	var err error
+
+	reRes = reBin.FindStringSubmatch(lit)
+	if reRes != nil {
+		b, err = strconv.ParseInt(reRes[1]+reRes[2], 2, 8)
+	} else {
+		reRes = reOct.FindStringSubmatch(lit)
+		if reRes != nil {
+			b, err = strconv.ParseInt(reRes[1]+reRes[2], 8, 8)
+		} else {
+			reRes = reHex.FindStringSubmatch(lit)
+			if reRes != nil {
+				b, err = strconv.ParseInt(reRes[1]+reRes[2], 16, 8)
+			} else {
+				reRes = reDec.FindStringSubmatch(lit)
+				if reRes != nil {
+					b, err = strconv.ParseInt(reRes[1]+reRes[2], 10, 8)
+				} else {
+					return 0, errors.New("Invalid literal. \"" + lit + "\"")
+				}
+			}
+		}
+	}
+
+	return byte(b), err
+}
+
+func TextToByteSlice(text string) ([]byte, error) {
+	text = strings.Replace(text, "\n", "", -1)
+	text = strings.Replace(text, "\r", "", -1)
+	// trims optional "[]byte{...}" wrapping
+	byteString := reOuter.FindStringSubmatch(text)[2]
+	byteString = strings.Trim(byteString, " \t\r\n,")
+
+	ret := make([]byte, 0, len(byteString)/6)
+	var reRes []string
+	var b byte
+	var err error
+	for len(byteString) > 0 {
+		reRes = reLit.FindStringSubmatch(byteString)
+		if reRes == nil {
+			return nil, errors.New("Invalid input string.")
+		}
+		b, err = litToByteSigned(reRes[0])
+		if err != nil {
+			b, err = litToByteUnsigned(reRes[0])
+			if err != nil {
+				return nil, err
+			}
+		}
+		ret = append(ret, b)
+
+		byteString = strings.Trim(byteString[len(reRes[0]):], " \t\r\n,")
+	}
+	return ret, nil
 }
