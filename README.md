@@ -66,5 +66,34 @@ $ gogen f2b -b 4 test.txt
 }
 ```
 
+# Contributing
+
+If you want to contribute feel free to create issues or to fork and send a pull request.
+Pull requests only on the develop branch and `gofmt` your code prior to committing please.
+
+If you want to add a new command please create a new folder with the same name as your command
+and add an import line in the `gogen.go` file of the root directory like so.
+
+```go
+import (
+    ...
+	_ "github.com/targodan/gogen/YOUR_CMD_NAME"
+    ...
+)
+```
+
+Any new files you add need to include the licenseheader (can be found in `licenseheader.txt`)-
+Please also add your name to the copyright section of any file you modify like so.
+
+```go
+/*
+ * Copyright (C) 2016 Some Name, Some Other Name, Even More Names,
+ *                    YOUR NAME
+ * ...
+ */
+```
+
+The order of contributers here is first-come-first-serve.
+
 # License
 This tool is under the GNU General Public License Version 3.
