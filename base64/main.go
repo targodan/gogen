@@ -38,7 +38,7 @@ func init() {
 					cli.IntFlag{
 						Name:  "linebreak, b",
 						Usage: "Break line after [value] bytes.",
-						Value: 12,
+						Value: 64,
 					},
 					cli.BoolFlag{
 						Name:  "clipboard, c",
@@ -83,7 +83,17 @@ func encode(c *cli.Context) (err error) {
 		return
 	}
 
-	out := base64.StdEncoding.EncodeToString(data)
+	tmp := base64.StdEncoding.EncodeToString(data)
+	lnbr := c.Int("linebreak")
+	out := ""
+	for len(tmp) > 0 {
+		partLen := lnbr
+		if len(tmp) < lnbr {
+			partLen = len(tmp)
+		}
+		out += fmt.Sprintln(tmp[:partLen])
+		tmp = tmp[partLen:]
+	}
 	fmt.Println(out)
 
 	if c.GlobalBool("clipboard") || c.Bool("clipboard") {
