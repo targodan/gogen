@@ -45,13 +45,17 @@ func BytesToString(data []byte, lnbr int) string {
 			ln = 0
 		}
 	}
-	if ln == 0 {
-		out = out[:len(out)-1]
+	if len(data) > 0 {
+		if ln == 0 {
+			out = out[:len(out)-1]
+		}
+		if lnbr > 0 {
+			out = fmt.Sprintln(out)
+		} else {
+			out = out[:len(out)-2]
+		}
 	}
-	if lnbr > 0 {
-		out = fmt.Sprintln(out)
-		out += "}"
-	}
+	out += "}"
 
 	return out
 }
@@ -70,7 +74,6 @@ func readFromStdin() (data []byte, err error) {
 	if err == io.EOF {
 		err = nil
 	}
-	data = bytes.Trim(data, " \t\r\n")
 	return
 }
 
@@ -80,6 +83,7 @@ func FileOrStdin(arg string) (data []byte, err error) {
 	} else {
 		data, err = readFromStdin()
 	}
+	data = bytes.Trim(data, " \t\r\n")
 	return
 }
 
@@ -88,6 +92,7 @@ func TextOrStdin(arg string) (string, error) {
 		return arg, nil
 	}
 	data, err := readFromStdin()
+	data = bytes.Trim(data, " \t\r\n")
 	return string(data), err
 }
 
