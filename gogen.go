@@ -30,7 +30,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-const APP_VER = "0.1.0-dev"
+const APP_VER = "0.1.0"
 
 func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())

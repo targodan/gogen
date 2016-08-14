@@ -1,9 +1,15 @@
-# gogen
+# gogen [![Build Status](https://travis-ci.org/targodan/gogen.svg?branch=develop)](https://travis-ci.org/targodan/gogen)
 A handy tool to generate small pieces of go code.
 
 # Installing
+You need at go version 1.4.
+This tool is tested against 1.4, 1.5 and 1.6.
+If you don't have it yet, get go [here](https://golang.org/).
+
+Once you have go, all you need to do in order to install or update gogen is:
+
 ```bash
-$ go get github.com/targodan/gogen
+$ go get -u github.com/targodan/gogen
 ```
 
 # Basic usage
