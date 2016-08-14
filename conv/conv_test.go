@@ -155,9 +155,11 @@ func TestFileOrStdin(t *testing.T) {
 	})
 	Convey("Reading from stdin should work.", t, func() {
 		f, err := os.Open("conv_test.data")
+		tmp := os.Stdin
 		os.Stdin = f
-
 		text, err := FileOrStdin("-")
+		os.Stdin = tmp
+
 		So(err, ShouldBeNil)
 		So(text, ShouldResemble, []byte("asdf asdjf3nv"))
 	})
