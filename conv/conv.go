@@ -1,3 +1,5 @@
+// Package conv provides some conversion and reading functions
+// used across multiple commands.
 package conv
 
 import (
@@ -31,6 +33,9 @@ func init() {
 	reDec = regexp.MustCompile(`^(-?)([1-9]\d*|0)$`)
 }
 
+// BytesToString converts a byte slice into an equivalent string.
+// Via the lnbr parameter you can set when to break lines. If lnbr
+// is larger than 0 a new line is added every lnbr bytes.
 func BytesToString(data []byte, lnbr int) string {
 	out := "[]byte{"
 	if lnbr > 0 {
@@ -77,6 +82,8 @@ func readFromStdin() (data []byte, err error) {
 	return
 }
 
+// FileOrStdin reads data from a file with the name arg, or from
+// stdin if arg == "-".
 func FileOrStdin(arg string) (data []byte, err error) {
 	if arg != "-" {
 		data, err = ioutil.ReadFile(arg)
@@ -87,6 +94,7 @@ func FileOrStdin(arg string) (data []byte, err error) {
 	return
 }
 
+// TextOrStdin returns arg, or from reads from stdin if arg == "-".
 func TextOrStdin(arg string) (string, error) {
 	if arg != "-" {
 		return arg, nil
@@ -156,6 +164,8 @@ func litToByteSigned(lit string) (byte, error) {
 	return byte(b), err
 }
 
+// TextToByteSlice converts a string in form of gocode into an equivalent
+// byte slice.
 func TextToByteSlice(text string) ([]byte, error) {
 	text = strings.Replace(text, "\n", "", -1)
 	text = strings.Replace(text, "\r", "", -1)
