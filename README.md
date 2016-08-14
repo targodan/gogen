@@ -1,4 +1,4 @@
-# gogen [![Build Status](https://travis-ci.org/targodan/gogen.svg?branch=develop)](https://travis-ci.org/targodan/gogen)
+# gogen [![Build Status](https://travis-ci.org/targodan/gogen.svg?branch=master)](https://travis-ci.org/targodan/gogen)
 A handy tool to generate small pieces of go code.
 
 # Installing
