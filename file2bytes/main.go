@@ -19,7 +19,10 @@
 package file2bytes
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
+	"io/ioutil"
 
 	"github.com/atotto/clipboard"
 	"github.com/targodan/gogen/commands"
@@ -27,12 +30,21 @@ import (
 	"github.com/urfave/cli"
 )
 
+type templateParameter struct {
+	Output   string
+	Filename string
+}
+
 func init() {
 	commands.Register(cli.Command{
 		Name:    "file2bytes",
 		Aliases: []string{"f2b"},
 		Usage:   "Convert a file into a golang byte slice.",
 		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "out, o",
+				Usage: "Output filename.",
+			},
 			cli.IntFlag{
 				Name:  "linebreak, b",
 				Usage: "Break line after [value] bytes.",
@@ -42,19 +54,48 @@ func init() {
 				Name:  "clipboard, c",
 				Usage: "Copy output to clipboard.",
 			},
+			cli.StringFlag{
+				Name:  "template, t",
+				Usage: "Use a template file where {{.Output}} is replaced with the bytes output and {{.Filename}} is the filename of the input file.",
+			},
 		},
 		Action: run,
 	})
 }
 
 func run(c *cli.Context) (err error) {
-	data, err := conv.FileOrStdin(c.Args().Get(0))
+	infile := c.Args().Get(0)
+	data, err := conv.FileOrStdin(infile)
 	if err != nil {
 		return
 	}
 
 	out := conv.BytesToString(data, c.Int("linebreak"))
-	fmt.Println(out)
+
+	templateFile := c.String("template")
+	if templateFile != "" {
+		tmplStr, err := ioutil.ReadFile(templateFile)
+		if err != nil {
+			return err
+		}
+		tmpl, err := template.New("Generated").Parse(string(tmplStr))
+		if err != nil {
+			return err
+		}
+		var buffer bytes.Buffer
+		err = tmpl.Execute(&buffer, templateParameter{out, infile})
+		if err != nil {
+			return err
+		}
+		out = buffer.String()
+	}
+
+	outname := c.String("out")
+	if outname == "" {
+		fmt.Println(out)
+	} else {
+		ioutil.WriteFile(outname, []byte(out), 0644)
+	}
 
 	if c.GlobalBool("clipboard") || c.Bool("clipboard") {
 		clipboard.WriteAll(out)
